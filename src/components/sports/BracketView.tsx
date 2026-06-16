@@ -54,6 +54,15 @@ function TieRow({ tie }: { tie: BracketTie }) {
  */
 export function BracketView({ ties }: { ties: BracketTie[] }) {
   const rounds = ROUND_ORDER.filter((r) => ties.some((t) => t.round === r));
+
+  if (rounds.length === 0) {
+    return (
+      <p className="rounded-xl border border-white/10 bg-pitch-900 p-4 text-sm text-line/60">
+        The knockout bracket fills in here once the group stage concludes and the Round of 32 is drawn.
+      </p>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
       {rounds.map((round) => (
