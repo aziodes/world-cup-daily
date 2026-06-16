@@ -53,7 +53,7 @@ export function MatchCard({ match }: { match: Match }) {
         <TeamRow {...match.away} score={match.score?.away} emphasize={awayLeads} />
       </div>
       <footer className="flex items-center justify-between gap-2 border-t border-white/5 pt-2 text-xs text-line/50">
-        <span className="truncate">{match.venue}, {match.city}</span>
+        <span className="truncate">{match.venue}{match.city ? `, ${match.city}` : ""}</span>
         {match.status === "scheduled" && <KickoffTime kickoffUtc={match.kickoffUtc} />}
       </footer>
     </Card>
