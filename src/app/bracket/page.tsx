@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { BracketView } from "@/components/sports/BracketView";
 import { getBracket } from "@/lib/services/tournamentService";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Knockout bracket",
