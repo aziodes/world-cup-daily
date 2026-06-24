@@ -16,7 +16,10 @@ import {
   getTopScorers,
   getUpcomingFixtures,
 } from "@/lib/services/tournamentService";
-export const revalidate = 300;
+
+// Revalidate every 30 seconds so live scores, results and upcoming fixtures
+// stay fresh without hammering the API on every request.
+export const revalidate = 30;
 
 // Server Component dashboard: data fetched once on the server, in parallel.
 export default async function HomePage() {
