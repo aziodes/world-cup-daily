@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { FilterBar } from "@/components/sports/FilterBar";
 import { getAllMatches } from "@/lib/services/tournamentService";
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Fixtures & results",
