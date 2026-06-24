@@ -16,6 +16,7 @@ import {
   getTopScorers,
   getUpcomingFixtures,
 } from "@/lib/services/tournamentService";
+export const revalidate = 30;
 
 // Server Component dashboard: data fetched once on the server, in parallel.
 export default async function HomePage() {
