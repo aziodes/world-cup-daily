@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { StandingsTable } from "@/components/sports/StandingsTable";
 import { getGroups } from "@/lib/services/tournamentService";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Group standings",
