@@ -85,3 +85,16 @@ Everything reads through `lib/services/tournamentService.ts`. To go live:
   browser chrome, in landscape.
 - `appleWebApp` metadata in `layout.tsx` gives the iOS title and a
   translucent status bar to match the dark theme.
+
+## Going live with football-data.org
+
+Set `FOOTBALL_DATA_API_KEY` in your environment and `lib/services/tournamentService.ts`
+switches automatically from mock data to real fixtures, scores, standings and
+top scorers. No key set → behaves exactly as before. Key set but a request
+fails (rate limit, brief outage) → falls back to mock data for that call, so
+the site never breaks.
+
+Known simplifications: clean sheets are tracked per team rather than per
+goalkeeper (the free tier has no lineup data), the knockout bracket stays
+empty until the Round of 32 is actually drawn, and the daily digest stays as
+a written blurb (a natural fit for an RSS feed later, not built here).
