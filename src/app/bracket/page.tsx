@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { BracketView } from "@/components/sports/BracketView";
 import { getBracket } from "@/lib/services/tournamentService";
-export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Knockout bracket",
   description: "FIFA World Cup 2026 knockout rounds, results and progression.",
 };
+
+// Bracket results settle after each knockout match.
+export const revalidate = 300;
 
 export default async function BracketPage() {
   const ties = await getBracket();
