@@ -110,7 +110,7 @@ function mapMatch(raw: any): Match {
     id: String(raw.id),
     stage: stageLabel,
     kickoffUtc: raw.utcDate,
-    venue: raw.venue ?? "Venue TBC",
+    venue: raw.venue ?? "",
     city: "", // football-data.org doesn't separate city from venue name.
     status,
     minute: typeof raw.minute === "number" ? raw.minute : undefined,
