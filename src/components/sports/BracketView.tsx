@@ -18,11 +18,24 @@ const ROUND_LABELS: Record<BracketRound, string> = {
   final: "Final",
 };
 
+function formatKickoff(utc: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "UTC",
+  }).format(new Date(utc));
+}
+
 function TieRow({ tie }: { tie: BracketTie }) {
   const sides = [
     { team: tie.home, score: tie.score?.home },
     { team: tie.away, score: tie.score?.away },
   ];
+  const bothTbd = !tie.home && !tie.away;
+
   return (
     <Card as="li" className="min-w-[200px] space-y-1 p-3 text-sm">
       {sides.map((side, i) => {
@@ -44,6 +57,10 @@ function TieRow({ tie }: { tie: BracketTie }) {
           </div>
         );
       })}
+      {/* Show kickoff date when no teams are known yet — gives context without guessing team labels */}
+      {bothTbd && (
+        <p className="pt-1 text-[11px] text-line/40">{formatKickoff(tie.kickoffUtc)} UTC</p>
+      )}
     </Card>
   );
 }
