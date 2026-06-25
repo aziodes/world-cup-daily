@@ -39,6 +39,14 @@ export function MatchCard({ match }: { match: Match }) {
   const homeLeads = hasScore && match.score!.home > match.score!.away;
   const awayLeads = hasScore && match.score!.away > match.score!.home;
 
+  // Show footer only when there's something useful to display:
+  // a known venue, or a kickoff time for an upcoming match.
+  const venueLabel = match.venue
+    ? `${match.venue}${match.city ? `, ${match.city}` : ""}`
+    : "";
+  const isScheduled = match.status === "scheduled";
+  const showFooter = Boolean(venueLabel) || isScheduled;
+
   return (
     <Card as="article" className="space-y-2">
       <header className="flex items-center justify-between gap-2 text-xs text-line/60">
@@ -52,10 +60,12 @@ export function MatchCard({ match }: { match: Match }) {
         <TeamRow {...match.home} score={match.score?.home} emphasize={homeLeads} />
         <TeamRow {...match.away} score={match.score?.away} emphasize={awayLeads} />
       </div>
-      <footer className="flex items-center justify-between gap-2 border-t border-white/5 pt-2 text-xs text-line/50">
-        <span className="truncate">{match.venue}{match.city ? `, ${match.city}` : ""}</span>
-        {match.status === "scheduled" && <KickoffTime kickoffUtc={match.kickoffUtc} />}
-      </footer>
+      {showFooter && (
+        <footer className="flex items-center justify-between gap-2 border-t border-white/5 pt-2 text-xs text-line/50">
+          <span className="truncate">{venueLabel}</span>
+          {isScheduled && <KickoffTime kickoffUtc={match.kickoffUtc} />}
+        </footer>
+      )}
     </Card>
   );
 }
