@@ -66,18 +66,24 @@ const FLAGS: Record<string, string> = {
   "New Caledonia": "🇳🇨", Curacao: "🇨🇼", Jamaica: "🇯🇲", Uzbekistan: "🇺🇿",
 };
 
-function flagFor(name: string, tla?: string): string {
+// FIX: name and tla can both be null for TBD knockout-round placeholder teams.
+function flagFor(name: string | null | undefined, tla?: string | null): string {
+  if (!name) return tla ?? "";
   return FLAGS[name] ?? tla ?? name.slice(0, 3).toUpperCase();
 }
 
 // --- mapping raw football-data.org payloads onto our own types -----------
 
+// FIX: football-data.org returns placeholder teams for undecided knockout
+// fixtures with name/tla/shortName all null. Guard every field so mapMatch
+// (and anything that calls it) never throws.
 function mapTeam(raw: any): Team {
+  const name: string = raw.name ?? raw.shortName ?? (raw.tla ? String(raw.tla) : "TBD");
   return {
-    id: String(raw.id),
-    name: raw.name,
-    code: raw.tla ?? raw.shortName ?? raw.name.slice(0, 3).toUpperCase(),
-    flag: flagFor(raw.name, raw.tla),
+    id: String(raw.id ?? "tbd"),
+    name,
+    code: raw.tla ?? raw.shortName ?? name.slice(0, 3).toUpperCase(),
+    flag: flagFor(name, raw.tla),
   };
 }
 
@@ -232,8 +238,8 @@ export async function getBracket(): Promise<BracketTie[]> {
       .map((m: any): BracketTie | null => {
         const round = mapStageToBracketRound(m.stage);
         if (!round) return null;
-        const home = m.homeTeam ? mapTeam(m.homeTeam) : undefined;
-        const away = m.awayTeam ? mapTeam(m.awayTeam) : undefined;
+        const home = m.homeTeam?.name ? mapTeam(m.homeTeam) : undefined;
+        const away = m.awayTeam?.name ? mapTeam(m.awayTeam) : undefined;
         const ft = m.score?.fullTime;
         const hasScore = ft && (ft.home != null || ft.away != null);
         const winnerId =
