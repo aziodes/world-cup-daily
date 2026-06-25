@@ -231,7 +231,18 @@ export async function getGroups(): Promise<Group[]> {
 export async function getBracket(): Promise<BracketTie[]> {
   if (!hasApiKey()) return [];  // Empty → BracketView shows the "fills in after group stage" message.
   try {
-    const raw = (await fetchSeasonMatchesRaw()).filter(
+    // football-data.org only adds knockout fixtures to the season endpoint after the
+    // official draw, but the date-filtered endpoint returns them as soon as they're
+    // scheduled. Use a wide window (-7 days → +60 days) to cover the full knockout stage.
+    const now = new Date();
+    const from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const to = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
+    const knockoutRes = await fdFetch(
+      `/competitions/${COMPETITION}/matches?dateFrom=${isoDate(from)}&dateTo=${isoDate(to)}`,
+      1800
+    );
+    const knockoutData = await knockoutRes.json();
+    const raw = (knockoutData.matches ?? []).filter(
       (m: any) => m.stage && m.stage !== "GROUP_STAGE"
     );
     const ties = raw
