@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { StandingsTable } from "@/components/sports/StandingsTable";
 import { getGroups } from "@/lib/services/tournamentService";
-export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Group standings",
   description: "FIFA World Cup 2026 group tables with qualification status.",
 };
+
+// Group tables update after each match — 5 minutes is plenty.
+export const revalidate = 300;
 
 export default async function StandingsPage() {
   const groups = await getGroups();

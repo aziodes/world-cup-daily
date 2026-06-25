@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: "FIFA World Cup 2026 top scorers and clean sheet leaders.",
 };
 
+// Leaderboards move after each match.
+export const revalidate = 300;
+
 export default async function StatsPage() {
   const [scorers, cleanSheets] = await Promise.all([getTopScorers(), getCleanSheets()]);
   return (

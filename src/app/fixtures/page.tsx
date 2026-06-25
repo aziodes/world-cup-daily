@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { FilterBar } from "@/components/sports/FilterBar";
 import { getAllMatches } from "@/lib/services/tournamentService";
-export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Fixtures & results",
   description: "Every FIFA World Cup 2026 fixture and result, in your local timezone.",
 };
+
+// Fixtures change during matchdays — refresh every 30 seconds.
+export const revalidate = 30;
 
 export default async function FixturesPage() {
   const matches = await getAllMatches();

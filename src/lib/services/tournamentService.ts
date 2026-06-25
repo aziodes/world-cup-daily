@@ -223,7 +223,7 @@ export async function getGroups(): Promise<Group[]> {
 }
 
 export async function getBracket(): Promise<BracketTie[]> {
-  if (!hasApiKey()) return mockBracket;
+  if (!hasApiKey()) return [];  // Empty → BracketView shows the "fills in after group stage" message.
   try {
     const raw = (await fetchSeasonMatchesRaw()).filter(
       (m: any) => m.stage && m.stage !== "GROUP_STAGE"
@@ -250,11 +250,11 @@ export async function getBracket(): Promise<BracketTie[]> {
         };
       })
       .filter((t: BracketTie | null): t is BracketTie => t !== null);
-    // An empty array is expected (and correct) until the knockout rounds are drawn.
+    // Empty array is correct and expected during the group stage.
     return ties;
   } catch (err) {
-    console.error("getBracket: falling back to mock data", err);
-    return mockBracket;
+    console.error("getBracket: API error, showing empty bracket", err);
+    return []; // Return empty rather than mock — no fake data is better than wrong data.
   }
 }
 
@@ -312,7 +312,73 @@ export async function getCleanSheets(limit = 10): Promise<CleanSheetEntry[]> {
 }
 
 export async function getDailySummary(): Promise<DailySummary> {
-  // No free API gives editorial "today's digest" text — this is exactly the
-  // gap an RSS feed (BBC Sport, ESPN) would fill. Left as-is for now.
-  return mockDailySummary;
+  // Derived entirely from the match data we already fetch — no extra API call.
+  const now = new Date();
+  const todayKey = isoDate(now);
+  const matches = await getAllMatches();
+
+  const live = matches.filter((m) => m.status === "live" || m.status === "halftime");
+  const todayFinished = matches.filter(
+    (m) => m.status === "fulltime" && m.score && m.kickoffUtc.slice(0, 10) === todayKey
+  );
+  const recentResults = matches
+    .filter((m) => m.status === "fulltime" && m.score)
+    .sort((a, b) => b.kickoffUtc.localeCompare(a.kickoffUtc))
+    .slice(0, 3);
+  const upcoming = matches
+    .filter((m) => m.status === "scheduled")
+    .sort((a, b) => a.kickoffUtc.localeCompare(b.kickoffUtc));
+
+  const bullets: string[] = [];
+
+  // Live matches first
+  for (const m of live) {
+    const s = m.score ? `${m.score.home}–${m.score.away}` : "0–0";
+    const clock = m.status === "halftime" ? "HT" : `${m.minute ?? "?"}′`;
+    bullets.push(`🔴 ${m.home.name} ${s} ${m.away.name} (${clock}) — ${m.stage}`);
+  }
+
+  // Today's finished matches
+  for (const m of todayFinished) {
+    bullets.push(`FT: ${m.home.name} ${m.score!.home}–${m.score!.away} ${m.away.name} — ${m.stage}`);
+  }
+
+  // No matches today — fall back to recent results + next fixture
+  if (live.length === 0 && todayFinished.length === 0) {
+    for (const m of recentResults.slice(0, 2)) {
+      if (m.score) {
+        bullets.push(`${m.home.name} ${m.score.home}–${m.score.away} ${m.away.name} — ${m.stage}`);
+      }
+    }
+    if (upcoming.length > 0) {
+      const next = upcoming[0];
+      const kickoffLabel = new Intl.DateTimeFormat("en-GB", {
+        weekday: "short", day: "numeric", month: "short",
+        hour: "numeric", minute: "2-digit", timeZone: "UTC",
+      }).format(new Date(next.kickoffUtc));
+      bullets.push(`Next up: ${next.home.name} v ${next.away.name} · ${kickoffLabel} UTC`);
+    }
+  }
+
+  if (bullets.length === 0) {
+    bullets.push("No recent match data available — check back on matchdays.");
+  }
+
+  const dateLabel = new Intl.DateTimeFormat("en-GB", {
+    weekday: "long", day: "numeric", month: "long", timeZone: "UTC",
+  }).format(now);
+
+  let headline: string;
+  if (live.length > 0) {
+    headline = `${live.length} match${live.length > 1 ? "es" : ""} live right now`;
+  } else if (todayFinished.length > 0) {
+    headline = `${todayFinished.length} result${todayFinished.length > 1 ? "s" : ""} today — ${dateLabel}`;
+  } else if (recentResults.length > 0 && recentResults[0].score) {
+    const r = recentResults[0];
+    headline = `Latest: ${r.home.name} ${r.score!.home}–${r.score!.away} ${r.away.name}`;
+  } else {
+    headline = `FIFA World Cup 2026 · ${dateLabel}`;
+  }
+
+  return { date: todayKey, headline, bullets };
 }
