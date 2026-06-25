@@ -58,7 +58,7 @@ function TieRow({ tie }: { tie: BracketTie }) {
         );
       })}
       {/* Show kickoff date when no teams are known yet — gives context without guessing team labels */}
-      {bothTbd && (
+      {bothTbd && tie.kickoffUtc && (
         <p className="pt-1 text-[11px] text-line/40">{formatKickoff(tie.kickoffUtc)} UTC</p>
       )}
     </Card>
