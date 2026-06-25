@@ -245,12 +245,10 @@ export async function getBracket(): Promise<BracketTie[]> {
     const raw = (knockoutData.matches ?? []).filter(
       (m: any) => m.stage && m.stage !== "GROUP_STAGE"
     );
-    // TEMP DEBUG: log the first raw knockout match to see all available fields
-    if (raw.length > 0) {
-      console.log("DEBUG bracket sample match:", JSON.stringify(raw[0], null, 2));
-    } else {
-      console.log("DEBUG bracket: no non-GROUP_STAGE matches returned");
-    }
+    // TEMP DEBUG: log all knockout match IDs and dates
+    console.log("DEBUG bracket matches:", JSON.stringify(
+      raw.map((m: any) => ({ id: m.id, stage: m.stage, date: m.utcDate, home: m.homeTeam?.name, away: m.awayTeam?.name }))
+    ));
     const ties = raw
       .map((m: any): BracketTie | null => {
         const round = mapStageToBracketRound(m.stage);
