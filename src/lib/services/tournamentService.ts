@@ -245,10 +245,6 @@ export async function getBracket(): Promise<BracketTie[]> {
     const raw = (knockoutData.matches ?? []).filter(
       (m: any) => m.stage && m.stage !== "GROUP_STAGE"
     );
-    // TEMP DEBUG: log all knockout match IDs and dates
-    console.log("DEBUG bracket matches:", JSON.stringify(
-      raw.map((m: any) => ({ id: m.id, stage: m.stage, date: m.utcDate, home: m.homeTeam?.name, away: m.awayTeam?.name }))
-    ));
     const ties = raw
       .map((m: any): BracketTie | null => {
         const round = mapStageToBracketRound(m.stage);
